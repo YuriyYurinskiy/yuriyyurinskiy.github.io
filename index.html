@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Yuriy Yurinskiy</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: grey;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            vertical-align: middle;
+            display: table;
+        }
+
+        h1 {
+            z-index: 5;
+            color: white;
+            opacity: .6;
+            font-size: 3em;
+            font-family: 'Source Sans Pro', sans-serif !important;
+            font-weight: 700;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        canvas#snow {
+            z-index: 10;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Coming soon...</h1>
+<canvas id="snow"></canvas>
+<script>
+  // Отвечают за горизонтальное движение
+  const HORIZONTAL_MOVE = .05;
+  const HORIZONTAL_K = .98;
+  // Отвечают за вертикальные движения
+  const VERTICAL_K = .8;
+
+  var flakes = [],
+    canvas = document.getElementById("snow"),
+    ctx = canvas.getContext("2d"),
+    flakeCount = 200,
+    mX = -100,
+    mY = -100;
+
+  function snow() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var e = 0; e < flakeCount; e++) {
+      var t = flakes[e],
+        i = mX,
+        n = mY,
+        o = t.x,
+        s = t.y,
+        a = Math.sqrt((o - i) * (o - i) + (s - n) * (s - n));
+      if (a < 150) {
+        var r = (i - o) / a,
+          l = (n - s) / a,
+          c = 150 / (a * a) / 2;
+        t.velX -= c * r;
+        t.velY -= c * l;
+      } else {
+        t.velX *= HORIZONTAL_K;
+      }
+
+      if (t.velY <= t.speed)
+        t.velY = t.speed;
+
+      t.velX += Math.cos(t.step += HORIZONTAL_MOVE) * t.stepSize;
+      ctx.fillStyle = "rgba(255,255,255," + t.opacity + ")";
+
+      t.y += t.velY * VERTICAL_K;
+      t.x += t.velX;
+
+      if (t.y >= canvas.height || t.y <= 0 || t.x >= canvas.width || t.x <= 0)
+        reset(t);
+
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.size, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    requestAnimationFrame(snow)
+  }
+
+  function reset(e) {
+    e.x = Math.floor(Math.random() * canvas.width);
+    e.y = 0;
+    e.size = 3 * Math.random() + 2;
+    e.speed = Math.random();
+    e.velY = e.speed;
+    e.velX = 0;
+    e.opacity = .5 * Math.random() + .3;
+  }
+
+  function init() {
+    for (var e = 0; e < flakeCount; e++) {
+      flakes.push({
+        speed: Math.random(),
+        velY: Math.random(),
+        velX: 0,
+        x: Math.floor(Math.random() * canvas.width),
+        y: Math.floor(Math.random() * canvas.height),
+        size: 3 * Math.random() + 2,
+        stepSize: Math.random() / 30,
+        step: 0,
+        opacity: .5 * Math.random() + .3
+      });
+    }
+    snow();
+  }
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  window.addEventListener("resize", function () {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+  // Реакция на мышь
+  // canvas.addEventListener("mousemove", function (e) {
+  //   mX = e.clientX;
+  //   mY = e.clientY;
+  // });
+
+  // Запуск снегопада
+  init();
+</script>
+</body>
+</html>
